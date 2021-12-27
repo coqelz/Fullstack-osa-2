@@ -1,4 +1,4 @@
-import { configure } from '@testing-library/react'
+
 import React from 'react'
 import Course from './components/Course'
 
@@ -56,7 +56,7 @@ const App = () => {
       <h1>
         Web development curriculum
       </h1>
-      <Course course={courses} />
+      <Course courses={courses} />
     </div>
   )
 }
@@ -143,7 +143,7 @@ const Total = ({course}) => {
   )
 }
 
-  
+  import { configure } from '@testing-library/react'
   
 
 
