@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import data from './services/names'
 
 const PersonForm = ({addName, newName, newNumber, changeName, changeNumber}) => (
   <form onSubmit={addName}>
@@ -15,7 +15,7 @@ const PersonForm = ({addName, newName, newNumber, changeName, changeNumber}) => 
       </form>
 )
 
-const Names = ({names, newFilter}) => {
+const Names = ({names, newFilter, deleteNumber}) => {
   return(
     <div>
     {names.filter((one) => {
@@ -25,8 +25,8 @@ const Names = ({names, newFilter}) => {
         return one
       }
     }).map(name =>    
-      <p key={name.name}>
-          {name.name} {name.number}
+      <p key={name.id}>
+          {name.name} {name.number} <button onClick={() => deleteNumber(name.id)}>delete</button> 
         </p>
       )
        }
@@ -55,24 +55,42 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
 
+
   useEffect (() => {
-    axios
-    .get('http://localhost:3001/persons')
-    .then(response => {
-      setPersons(response.data)
-    }
-    )
+    data
+    .getAll()
+    .then(base => {
+      setPersons(base)
+    })
   }, [])
+
+
+  const deleteNumber = (id) => {
+    const numberToDelete = persons.find(n => n.id === id)
+    if(window.confirm(`Delete ${numberToDelete.name}?`)) {
+      data
+      .remove(id)
+      .then(removed => {
+        setPersons(persons.concat(removed))
+        setPersons(persons.filter(n => n.id !== id))
+    })
+    }
+  }
+console.log(persons)
 
   const filterNames = (event) => {
     event.preventDefault()
-    console.log(newFilter)
     setNewFilter(event.target.value)
   }
 
   
   const addName = (event) => {
     event.preventDefault()
+    console.log(event.target.value)
+    const defName = {
+      name: newName,
+      number: newNumber
+    }
 
     let result = false
      persons.forEach(one=> {
@@ -85,11 +103,15 @@ const App = () => {
      alert(`${newName} is already added to phonebook`)
     }
     else {
-    setPersons(persons.concat({name: newName, number: newNumber}))
+      data
+      .create(defName)
+      .then(added => {
+    setPersons(persons.concat(added))
     setNewName('')
     setNewNumber('')
-    }
+    })
   }
+}
 
   const changeName = (event) => {
     setNewName(event.target.value)
@@ -106,7 +128,7 @@ const App = () => {
       <PersonForm newName={newName} addName={addName} newNumber={newNumber} 
       changeName={changeName} changeNumber={changeNumber} />
       <h2>Numbers</h2>
-      <Names names={persons} newFilter={newFilter} />
+      <Names names={persons} newFilter={newFilter} deleteNumber={deleteNumber} />
     </div>
   )
 
