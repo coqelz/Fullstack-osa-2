@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import data from './services/names'
+import './index.css'
 
 const PersonForm = ({addName, newName, newNumber, changeName, changeNumber}) => (
   <form onSubmit={addName}>
@@ -15,6 +16,18 @@ const PersonForm = ({addName, newName, newNumber, changeName, changeNumber}) => 
       </form>
 )
 
+const Notification = ({message}) => {
+  if(message === null) {
+    return null
+  } else {
+  return(
+    <div className="error">
+      {message}
+    </div>
+  )}
+ 
+}
+
 const Names = ({names, newFilter, deleteNumber}) => {
   return(
     <div>
@@ -25,7 +38,7 @@ const Names = ({names, newFilter, deleteNumber}) => {
         return one
       }
     }).map(name =>    
-      <p key={name.id}>
+      <p key={name.name}>
           {name.name} {name.number} <button onClick={() => deleteNumber(name.id)}>delete</button> 
         </p>
       )
@@ -36,7 +49,7 @@ const Names = ({names, newFilter, deleteNumber}) => {
     
 
 
-const Filter = ({filterNames, newFilter}) => (
+const Filter = ({filterNames, newFilter}) =>  (
   <form>
     <div>
       filter: <input value={newFilter} onChange={filterNames}/>
@@ -54,6 +67,9 @@ const App = () => {
 
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+
+  const [goodMessage, setNewGood] = useState(null)  
+
 
 
   useEffect (() => {
@@ -73,10 +89,13 @@ const App = () => {
       .then(removed => {
         setPersons(persons.concat(removed))
         setPersons(persons.filter(n => n.id !== id))
+        setNewGood(`Deleted ${numberToDelete.name}`)
+        setTimeout(() => {
+         setNewGood(null)}, 4000)
     })
     }
   }
-console.log(persons)
+
 
   const filterNames = (event) => {
     event.preventDefault()
@@ -86,29 +105,44 @@ console.log(persons)
   
   const addName = (event) => {
     event.preventDefault()
-    console.log(event.target.value)
     const defName = {
       name: newName,
       number: newNumber
     }
-
+    let id = 0
     let result = false
      persons.forEach(one=> {
-      if(one.name === newName)
+      if(one.name === newName) {
+      id = one.id
       result = true
+      }
      }
       )
-    
+    console.log(result)
     if(result) {
-     alert(`${newName} is already added to phonebook`)
-    }
+      if(window.confirm(`Replace number of ${newName}?`)) {
+      data
+      .update(id, defName)
+      .then(() => {
+        setPersons(persons)
+      setNewGood(`Updated ${newName}`)
+   setTimeout(() => {
+    setNewGood(null)}, 4000)
+    setNewName('')
+    setNewNumber('')
+    })}
+  }
     else {
+    
       data
       .create(defName)
       .then(added => {
     setPersons(persons.concat(added))
     setNewName('')
     setNewNumber('')
+   setNewGood(`Added ${newName}`)
+   setTimeout(() => {
+    setNewGood(null)}, 4000)
     })
   }
 }
@@ -123,6 +157,7 @@ console.log(persons)
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={goodMessage} />
       <Filter filterNames={filterNames} newFilter={newFilter}/>
       <h2>add a new</h2>
       <PersonForm newName={newName} addName={addName} newNumber={newNumber} 
@@ -146,4 +181,6 @@ return(
       )}
    </div>
  )
+ setNewGood(`Added ${newName}`)
+   <Notification message={goodMessage} />
       */
