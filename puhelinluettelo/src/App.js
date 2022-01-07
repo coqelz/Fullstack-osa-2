@@ -114,7 +114,7 @@ const App = () => {
      persons.forEach(one=> {
       if(one.name === newName) {
       id = one.id
-      result = true
+      result = true 
       }
      }
       )
@@ -171,16 +171,3 @@ const App = () => {
 
 export default App
 
-/*
-return(
-   <div>
-    {names.map(name => 
-      <p key={name.name}>
-          {name.name} {name.number}
-        </p>
-      )}
-   </div>
- )
- setNewGood(`Added ${newName}`)
-   <Notification message={goodMessage} />
-      */
